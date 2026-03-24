@@ -6,3 +6,6 @@ joblib
 flask
 flask-cors
 streamlit
+xgboost
+matplotlib
+seaborn
