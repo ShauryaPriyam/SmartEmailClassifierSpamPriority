@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SpamLens AI</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    text-align: center;
+}
+
+.container {
+    width: 70%;
+    margin: auto;
+    margin-top: 40px;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+button {
+    padding: 10px;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+}
+
+.result {
+    margin-top: 20px;
+    font-size: 22px;
+}
+
+.spam { color: red; }
+.not-spam { color: #22c55e; }
+
+.card {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.bar {
+    height: 10px;
+    background: gray;
+    margin-top: 5px;
+}
+
+.fill {
+    height: 100%;
+    background: #22c55e;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>SpamLens AI 🔍</h1>
+
+<form method="POST">
+<textarea name="email">{{ text }}</textarea>
+
+<br>
+
+<select name="model">
+{% for m in models %}
+<option value="{{ m }}">{{ m }}</option>
+{% endfor %}
+</select>
+
+<br>
+<button type="submit">Analyze</button>
+<button type="button" onclick="clearText()">Clear</button>
+</form>
+
+{% if prediction is not none %}
+
+<div class="result {{ prediction }}">
+Prediction: {{ prediction.upper() }}
+</div>
+
+<div>Confidence: {{ (confidence*100)|round(2) }}%</div>
+
+<!-- 🔥 MODEL COMPARISON -->
+<div class="card">
+<h3>Model Comparison</h3>
+<div id="models"></div>
+</div>
+
+<!-- 🔥 SHAP -->
+<div class="card">
+<h3>Why this prediction?</h3>
+<div id="shap"></div>
+</div>
+
+{% endif %}
+
+</div>
+
+<script>
+const data = {{ all_results|safe }};
+const shap = {{ shap_data|safe }};
+
+// MODEL COMPARISON
+let html = "";
+for (let m in data) {
+    html += `<p>${m} → ${data[m].prediction} (${data[m].confidence}%)</p>`;
+}
+document.getElementById("models").innerHTML = html;
+
+// SHAP
+let shapHtml = "";
+shap.forEach(s => {
+    shapHtml += `<p>${s.word} : ${s.value.toFixed(3)}</p>`;
+});
+document.getElementById("shap").innerHTML = shapHtml;
+
+function clearText(){
+    document.querySelector("textarea").value = "";
+}
+</script>
+
+</body>
+</html>
